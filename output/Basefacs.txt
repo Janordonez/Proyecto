@@ -1,0 +1,15 @@
+Joshua,Mani,400,60,460,1293912,Dolares,24,6,24
+Frenos,20
+Final
+Joshua,Yarince,4000,600,4600,2312312,DOlares,24,6,24
+Frenos,20
+Final
+Joshua,Yarince,1000000,150000,1150000,21312312,Dolares,24,6,24
+Frenos,1000
+Final
+Anibal,Joshua,10000,1500,11500,2312312,Dolares,24,6,24
+Culata,10000
+Final
+awdaw,daw,10000,1500,11500,2131,aw,24,6,24
+Culata,10000
+Final

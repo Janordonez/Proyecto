@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cstdio>
 
 using namespace std;
 
@@ -10,6 +11,12 @@ struct Productos{
     vector <string> nombre;
     vector <int> PU;
     vector <int> Cantidad;
+};
+
+struct Productosid{
+    string nombre;
+    int PU;
+    int Cantidad;
 };
 
 void menu();
@@ -23,6 +30,7 @@ int main(){
 }
 
 void menu(){
+    system("cls");
     char opc;
     do {
         cout << "------------------------------------------------------------\n";
@@ -40,7 +48,7 @@ void menu(){
                 añadirmenu();    
                 break;
             case '2':
-                añadirmenu();
+                verinv();
                 break;
             case '3':
                 break;
@@ -52,6 +60,7 @@ void menu(){
 }
 
 void añadirmenu(){
+    system("cls");
     char opc;
     do {
         cout << "------------------------------------------------------------\n";
@@ -83,11 +92,56 @@ void añadirmenu(){
 
 void añadiraexistente(){
     ifstream in("Basedatosinv.txt");
+    ofstream temp("Basedatosinvtemp.txt");
+
+    Productosid Productosid;
+    string idproducto;
+    int ncantidad;
     string line;
+    bool nuevosi = false;
+
+    
+
+    while(getline(in, line)){
+        cout << line << endl;
+    };
+
+    in.clear();
+    in.seekg(0, ios::beg);
+
+
+    cin.ignore();
+    cout << "Digite el producto que desea añadir: " << endl;
+    getline(cin, idproducto);
+
+    cout << "Cantidad: " << endl;
+    cin >> ncantidad;
+
     while(getline(in, line)){
         stringstream ss(line);
-         
+        getline(ss, Productosid.nombre, ',');
+        ss >> Productosid.PU;
+        ss.ignore();
+        ss >> Productosid.Cantidad;
+        if(Productosid.nombre == idproducto){
+            nuevosi = true;
+            temp << idproducto << ',' << Productosid.PU << ',' << ncantidad << endl;
+        } else{
+            temp << Productosid.nombre << ',' << Productosid.PU << ',' << Productosid.Cantidad << endl;
+        }
     }
+
+    if(!nuevosi){
+            cout << "El producto no fue encontrado!"<< endl;
+            system("pause");
+        } else{
+            cout << "Cantidad en inventario actualizado correctamente!" << endl;
+        }
+    in.close();
+    temp.close();
+
+    remove("Basedatosinv.txt");
+    rename("Basedatosinvtemp.txt", "Basedatosinv.txt");
 }
 void añadirinvnuevo(){
     system("cls");
@@ -153,5 +207,6 @@ void verinv(){
     
     }
     in.close();
+    system("pause");
     menu();
 }

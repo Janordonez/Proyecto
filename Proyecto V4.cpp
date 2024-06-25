@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
+#include <cstdio>
 #include <windows.h>
 #include <ctime>
 #include <thread>
@@ -60,7 +61,6 @@ void reloj(){
         año = time->tm_year;
         mes = time->tm_mon;
         dia = time->tm_mday;
-        
 }
 
 
@@ -124,18 +124,22 @@ void crearfac() {
     thread relojcontador (reloj);
     Factura FAC1;
     string producto;
-    int precioproducto;
     char opc;
 
     string productocomp;
     int preciocomp;
     int cantidad;
+
+    string productocomp1;
+    int preciocomp1;
+    int cantidad1;
+
     int ninv;
 
     ifstream INV("Basedatosinv.txt");
     string line;
 
-    ofstream temp("Basefacstemp.txt");
+    ofstream temp("Basedatosinv1.txt");
     if(!temp){
         return;
     }
@@ -144,19 +148,32 @@ void crearfac() {
     cout << "Ingrese el nombre del cliente:" << endl;
     cin.ignore();
     getline(cin, FAC1.nombrecl);
-    cout << "Digite el numero celular del cliente:" << endl;
+    cout << "\nDigite el numero celular del cliente:" << endl;
     cin >> FAC1.celular;
-    cout << "Ingrese el nombre del vendedor:" << endl;
+    cout << "\nIngrese el nombre del vendedor:" << endl;
     cin.ignore();
     getline(cin, FAC1.nombrevndr);
 
+    
+
+    cout << "\nProductos en inventario:" << endl;
+
+    while(getline(INV, line)){
+        stringstream ss(line);
+        getline(ss, productocomp1, ',');
+        ss >> preciocomp1;
+        ss.ignore();
+        ss >> cantidad1;
+        cout << "\nProducto: " << productocomp1 << " "<< "Precio: " << preciocomp1 << " "<< "Cantidad: " << cantidad1 << endl;
+    }
+
+    INV.clear();
+    INV.seekg(0, ios::beg);
+
     do {
-       cout << "Ingrese los productos:" << endl;
+        cout << "\nIngrese los productos:" << endl;
         getline(cin, producto);
 
-        cout << "Digite el precio del producto que ingreso:" << endl;
-        cin >> precioproducto;
-    
         cout << "Digite la cantidad del producto que desea facturar:" << endl;
         cin >> FAC1.multpro;
 
@@ -179,22 +196,27 @@ void crearfac() {
             }
         }
         
-        remove("Basedatoinv.txt");
-        rename("Basefacstemp.txt", "Basedatoinv.txt");
+        
 
-        FAC1.totalsinIVA += precioproducto * FAC1.multpro;
+        FAC1.totalsinIVA += preciocomp * FAC1.multpro;
         FAC1.TOTALIVA = 0.15 * FAC1.totalsinIVA;
         FAC1.TOTALIVA2 = FAC1.TOTALIVA + FAC1.totalsinIVA;
         FAC1.productos.push_back(producto);
-        FAC1.preciopro.push_back(precioproducto);
-
+        FAC1.preciopro.push_back(preciocomp);
         
     } while (opc == 'S' || opc == 's');
 
+    INV.close();
+    temp.close();
+
+    remove("Basedatosinv.txt");
+    rename("Basedatosinv1.txt", "Basedatosinv.txt");
+
+    fflush(stdout);
+
     cout << "Digite el tipo de cancelacion:" << endl;
+    cin.ignore();
     getline(cin, FAC1.cancelacion);
-
-
 
     ofstream out("Basefacs.txt", ios::app);
     if (!out) {
