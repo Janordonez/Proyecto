@@ -18,6 +18,8 @@ struct Factura {
     vector<int> preciopro;
     string direccion = "Almacen SONY 2 cuadras y media al Oeste.";
     string cancelacion;
+    vector <int> id;
+    vector <int> cantidad;
     int totalsinIVA = 0;
     int IVA;
     int Numerofac;
@@ -27,6 +29,13 @@ struct Factura {
     int RUC;
     int multpro;
     
+};
+
+struct Comparador{
+    string productocomp;
+    int preciocomp;
+    int cantidad;
+    int id;
 };
 
 struct fecha{
@@ -67,6 +76,7 @@ void reloj(){
 void menu();
 void crearfac();
 void verfac();
+void restarINV();
 void eliminarfac();
 
 int main() {
@@ -119,28 +129,24 @@ void menu() {
     } while (opc != '4');
 }
 
+
+
 void crearfac() {
     system("cls");
-    thread relojcontador (reloj);
+   
     Factura FAC1;
-    string producto;
+    
     char opc;
 
-    string productocomp;
-    int preciocomp;
-    int cantidad;
+    Comparador COMP1;
 
-    string productocomp1;
-    int preciocomp1;
-    int cantidad1;
+    int idcomp;
 
-    int ninv;
+
+    string line1;
 
     ifstream INV("Basedatosinv.txt");
-    string line;
-
-    ofstream temp("Basedatosinv1.txt");
-    if(!temp){
+    if(!INV){
         return;
     }
     
@@ -158,64 +164,60 @@ void crearfac() {
 
     cout << "\nProductos en inventario:" << endl;
 
-    while(getline(INV, line)){
-        stringstream ss(line);
-        getline(ss, productocomp1, ',');
-        ss >> preciocomp1;
+    while(getline(INV, line1)){
+        stringstream ss(line1);
+        ss >> COMP1.id;
         ss.ignore();
-        ss >> cantidad1;
-        cout << "\nProducto: " << productocomp1 << " "<< "Precio: " << preciocomp1 << " "<< "Cantidad: " << cantidad1 << endl;
+        getline(ss, COMP1.productocomp, ',');
+        ss >> COMP1.preciocomp;
+        ss.ignore();
+        ss >> COMP1.cantidad;
+        cout << "ID:" << COMP1.id << " " << "Producto: " << COMP1.productocomp << " "<< "Precio: " << COMP1.preciocomp << " "<< "Cantidad: " << COMP1.cantidad << endl;
     }
 
-    INV.clear();
-    INV.seekg(0, ios::beg);
-
+    
     do {
-        cout << "\nIngrese los productos:" << endl;
-        getline(cin, producto);
+        INV.clear();
+        INV.seekg(0, ios::beg);
 
-        cout << "Digite la cantidad del producto que desea facturar:" << endl;
+        cout << "Digite el id del producto: " << endl;
+        cin >> idcomp;
+
+        cout << "Digite la cantidad que desea facturar: " << endl;
         cin >> FAC1.multpro;
+        
+        while(getline(INV, line1)){
+            stringstream ss(line1);
+            ss >> COMP1.id;
+            ss.ignore();
+            getline(ss, COMP1.productocomp, ',');
+            ss >> COMP1.preciocomp;
+            ss.ignore();
+            ss >> COMP1.cantidad;
+            if(COMP1.id == idcomp){
+                FAC1.productos.push_back(COMP1.productocomp);
+                FAC1.preciopro.push_back(COMP1.preciocomp);
+                FAC1.id.push_back(idcomp);
+                FAC1.cantidad.push_back(FAC1.multpro);
+                FAC1.totalsinIVA += COMP1.preciocomp * FAC1.multpro;
+                FAC1.TOTALIVA += 0.15 * FAC1.totalsinIVA;
+                FAC1.TOTALIVA2 += FAC1.TOTALIVA + FAC1.totalsinIVA;
+            }
+        }
 
         cout << "Desea ingresar otro producto? (S/N): ";
         cin >> opc;
         cin.ignore();
-
-        while(getline(INV, line)){
-            stringstream ss(line);
-            getline(ss, productocomp, ',');
-            ss >> preciocomp;
-            ss.ignore();
-            ss >> cantidad;
-            if(productocomp == producto){
-                ninv = cantidad - FAC1.multpro;
-                temp << productocomp << "," << preciocomp << "," << ninv;
-            }
-            else{
-                temp << "\n" << line;
-            }
-        }
-        
-        
-
-        FAC1.totalsinIVA += preciocomp * FAC1.multpro;
-        FAC1.TOTALIVA = 0.15 * FAC1.totalsinIVA;
-        FAC1.TOTALIVA2 = FAC1.TOTALIVA + FAC1.totalsinIVA;
-        FAC1.productos.push_back(producto);
-        FAC1.preciopro.push_back(preciocomp);
         
     } while (opc == 'S' || opc == 's');
 
     INV.close();
-    temp.close();
 
     remove("Basedatosinv.txt");
-    rename("Basedatosinv1.txt", "Basedatosinv.txt");
 
     fflush(stdout);
 
     cout << "Digite el tipo de cancelacion:" << endl;
-    cin.ignore();
     getline(cin, FAC1.cancelacion);
 
     ofstream out("Basefacs.txt", ios::app);
@@ -226,7 +228,7 @@ void crearfac() {
 
     out << FAC1.nombrecl << ',' << FAC1.nombrevndr << ',' << FAC1.totalsinIVA << ',' << FAC1.TOTALIVA << ',' << FAC1.TOTALIVA2 << ',' << FAC1.celular << ',' << FAC1.cancelacion << ',' << dia << ',' << mes + 1 << ',' << año - 100 << '\n';
     for (size_t i = 0; i < FAC1.productos.size(); ++i) {
-        out << FAC1.productos[i] << ',' << FAC1.preciopro[i] << '\n';
+        out << FAC1.productos[i] << ',' << FAC1.preciopro[i] << ',' << FAC1.cantidad[i] << '\n';
     }
     out << "Final" << '\n';
     out.close();
@@ -286,13 +288,16 @@ void verfac() {
             FAC1.preciopro.clear();
 
             while (getline(in, line) && line != "Final"){
-                stringstream ssProduct(line);
+                stringstream ss(line);
                 string producto;
                 int precio;
-                getline(ssProduct, producto, ',');
-                ssProduct >> precio;
+                int cantidad;
+                getline(ss, producto, ',');
+                ss >> precio;
+                ss.ignore();
+                ss >> cantidad;
             
-                cout << "Producto: " << producto << " - Precio: " << precio << endl;
+                cout << "Producto: " << producto << " - Precio: " << precio << " - Cantidad: " << cantidad << endl;
             }
             cout << "Fecha: " << FECH1.dias << ":" << FECH1.mes << ":" << FECH1.año;
             cout << "\n------------------------------------" << endl;
@@ -340,12 +345,12 @@ void eliminarfac() {
 
         if (FAC1.nombrecl == nombre) {
             encontrado = true;
-            // Skip lines related to this factura
+            // Saltar lineas
             while (getline(in, line) && line != "Final") {
-                // do nothing
+                // No hacer nada
             }
         } else {
-            // Write the factura to the temp file
+            // Escribir factura en el archivo temporal
             temp << FAC1.nombrecl << ',' << FAC1.nombrevndr << ',' << FAC1.totalsinIVA << '\n';
 
             while (getline(in, line) && line != "Final") {
@@ -367,3 +372,4 @@ void eliminarfac() {
     remove("Basefacs.txt");
     rename("Tempfacs.txt", "Basefacs.txt");
 }
+

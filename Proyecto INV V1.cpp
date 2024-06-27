@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <windows.h>
 #include <string>
 #include <cstdio>
 
@@ -11,13 +12,29 @@ struct Productos{
     vector <string> nombre;
     vector <int> PU;
     vector <int> Cantidad;
+    vector <int> ID;
 };
 
 struct Productosid{
     string nombre;
     int PU;
     int Cantidad;
+    int ID;
 };
+
+void gotoxy(int x, int y) {
+    // Obtener el handle de la consola
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    
+    // Definir la estructura COORD con la posicióno
+    COORD pos;
+    pos.X = x;
+    pos.Y = y;
+    
+    // Mover el cursor a la posición definida
+    SetConsoleCursorPosition(hConsole, pos);
+}
+
 
 void menu();
 void añadirinvnuevo();
@@ -26,21 +43,54 @@ void verinv();
 void añadirmenu();
 
 int main(){
+    system("cls");
     menu();
 }
 
 void menu(){
     system("cls");
+    string line;
+    Productosid idmenu;
+
+    ifstream in("Basedatosinv.txt");
+    while(getline(in, line)){
+        stringstream ss(line);
+        ss >> idmenu.ID;
+        ss.ignore();
+        getline(ss, idmenu.nombre, ',');
+        ss >> idmenu.PU;
+        ss.ignore();
+        ss >> idmenu.Cantidad;
+
+        if(idmenu.Cantidad < 5){
+            cout << "Producto bajo en stock: " << idmenu.nombre << endl;
+        } else{
+
+        }
+    }
+
+    in.close();
+
+    
     char opc;
     do {
-        cout << "------------------------------------------------------------\n";
-        cout << "------------------------------------------------------------\n";
-        cout << "----------------------------MENU----------------------------\n";
-        cout << "------------------------1. Añadir---------------------------\n";
-        cout << "------------------------2. Ver Inventario-------------------\n";
-        cout << "------------------------3. Salir----------------------------\n";
-        cout << "------------------------------------------------------------\n";
-        cout << "------------------------------------------------------------\n";
+        
+        gotoxy(50, 6);
+        cout << "--------------------------------------------\n";
+        gotoxy(50, 7);
+        cout << "--------------------MENU--------------------\n";
+        gotoxy(63, 8);
+        cout << "1. Ingresar Productos\n";
+        gotoxy(63, 9);
+        cout << "2. Ver Productos\n";
+        gotoxy(63, 10);
+        cout << "3. Eliminar Productos\n";
+        gotoxy(63, 11);
+        cout << "4. Salir\n";
+        gotoxy(50, 12);
+        cout << "--------------------------------------------\n";
+        gotoxy(50, 13);
+        cout << "--------------------------------------------\n";
         cin >> opc;
 
         switch (opc) {
@@ -63,14 +113,22 @@ void añadirmenu(){
     system("cls");
     char opc;
     do {
-        cout << "------------------------------------------------------------\n";
-        cout << "------------------------------------------------------------\n";
-        cout << "----------------------------MENU----------------------------\n";
-        cout << "------------------------1. Añadir nuevo---------------------\n";
-        cout << "------------------------2. Añadir existente-----------------\n";
-        cout << "------------------------3. volver---------------------------\n";
-        cout << "------------------------------------------------------------\n";
-        cout << "------------------------------------------------------------\n";
+        gotoxy(50, 6);
+        cout << "--------------------------------------------\n";
+        gotoxy(50, 7);
+        cout << "--------------------MENU--------------------\n";
+        gotoxy(63, 8);
+        cout << "1. Ingresar Productos Nuevo\n";
+        gotoxy(63, 9);
+        cout << "2. Ingresar Productos Existentes\n";
+        gotoxy(63, 10);
+        cout << "3. Eliminar Productos\n";
+        gotoxy(63, 11);
+        cout << "4. Salir\n";
+        gotoxy(50, 12);
+        cout << "--------------------------------------------\n";
+        gotoxy(50, 13);
+        cout << "--------------------------------------------\n";
         cin >> opc;
 
         switch (opc) {
@@ -95,6 +153,7 @@ void añadiraexistente(){
     ofstream temp("Basedatosinvtemp.txt");
 
     Productosid Productosid;
+
     string idproducto;
     int ncantidad;
     string line;
@@ -118,6 +177,7 @@ void añadiraexistente(){
     cin >> ncantidad;
 
     while(getline(in, line)){
+        
         stringstream ss(line);
         getline(ss, Productosid.nombre, ',');
         ss >> Productosid.PU;
@@ -125,7 +185,7 @@ void añadiraexistente(){
         ss >> Productosid.Cantidad;
         if(Productosid.nombre == idproducto){
             nuevosi = true;
-            temp << idproducto << ',' << Productosid.PU << ',' << ncantidad << endl;
+            temp << Productosid.nombre << ',' << Productosid.PU << ',' << Productosid.Cantidad + ncantidad << endl;
         } else{
             temp << Productosid.nombre << ',' << Productosid.PU << ',' << Productosid.Cantidad << endl;
         }
@@ -137,12 +197,18 @@ void añadiraexistente(){
         } else{
             cout << "Cantidad en inventario actualizado correctamente!" << endl;
         }
+
+    fflush(stdout);
+
     in.close();
     temp.close();
 
     remove("Basedatosinv.txt");
     rename("Basedatosinvtemp.txt", "Basedatosinv.txt");
+
+    menu();
 }
+
 void añadirinvnuevo(){
     system("cls");
 
@@ -153,11 +219,16 @@ void añadirinvnuevo(){
     string nombre;
     int PU;
     int cantidad;
+    int ID;
 
     do{
     
     cin.ignore();
 
+    cout << "Digite el ID del producto:";
+    cin >> ID;
+
+    cin.ignore();
     cout << "Escriba el producto a añadir: ";
     getline(cin, nombre);
 
@@ -173,6 +244,7 @@ void añadirinvnuevo(){
     Producto1.nombre.push_back(nombre);
     Producto1.PU.push_back(PU);
     Producto1.Cantidad.push_back(cantidad);
+    Producto1.ID.push_back(ID);
     }while(opc == 'S');
 
     ofstream out("Basedatosinv.txt", ios :: app);
@@ -181,7 +253,7 @@ void añadirinvnuevo(){
     }
 
     for(size_t i = 0; i < Producto1.nombre.size(); i++ ){
-        out << Producto1.nombre[i] << ',' << Producto1.PU[i] << ',' << Producto1.Cantidad[i] << "\n";
+        out << Producto1.ID[i] << ',' << Producto1.nombre[i] << ',' << Producto1.PU[i] << ',' << Producto1.Cantidad[i] << "\n";
     }
 
     out.close();
@@ -193,17 +265,20 @@ void verinv(){
     int PU;
     string Nombre;
     int cantidad;
+    int id;
 
     ifstream in("Basedatosinv.txt");
 
     string line;
     while(getline(in, line)){
         stringstream ss(line);
+        cin >> id;
+        ss.ignore();
         getline(ss, Nombre, ',');
         ss >> PU;
         ss.ignore();
         ss >> cantidad;
-        cout << "Producto: " << Nombre << " ----- " << "Cantidad:" << cantidad << " ----- " << "Precio: " << PU << endl;
+        cout << "ID:" << id << " ----- " << "Producto: " << Nombre << " ----- " << "Precio: " << PU << " ----- " << "Cantidad:" << cantidad << endl;
     
     }
     in.close();
