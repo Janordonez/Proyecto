@@ -19,3 +19,7 @@ Final
 Joshua,awd,10,1,11,1231,Dolares,22,6,2024
 Filtro de combustible,10,1
 Final
+uhuh,ugu,8,1,9,54,j,27,6,24
+Alternador,2
+Alternador,2
+Final
