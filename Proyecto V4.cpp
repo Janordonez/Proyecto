@@ -42,6 +42,16 @@ struct fecha{
     int año;
     int mes;
     int dias;
+
+    int añoamax;
+    int mesmax;
+    int diasmax;
+};
+
+struct resumenesdats{
+    int totalventas;
+    vector <string> productosvendidos;
+    int productosvendidoscant;
 };
 
 
@@ -65,11 +75,13 @@ int mes;
 int dia;
 
 void reloj(){
-        time_t now = time(0);
-        tm * time = localtime(&now);
-        año = time->tm_year;
-        mes = time->tm_mon;
-        dia = time->tm_mday;
+    time_t now = time(nullptr);
+    struct tm * time = localtime(&now);
+    
+    año = 1900 + time->tm_year; // Año actual
+    mes = 1 + time->tm_mon;     // Mes actual (1-12)
+    dia = time->tm_mday;        // Día del mes (1-31)
+
 }
 
 
@@ -77,6 +89,7 @@ void menu();
 void crearfac();
 void verfac();
 void restarINV();
+void resumenes();
 void eliminarfac();
 
 int main() {
@@ -102,10 +115,12 @@ void menu() {
         gotoxy(50, 10);
         cout << "3. Eliminar Factura\n";
         gotoxy(50, 11);
-        cout << "4. Salir\n";
-        gotoxy(30, 12);
-        cout << "------------------------------------------------------------\n";
+        cout << "4. Resumenes\n";
+        gotoxy(50, 12);
+        cout << "5. Salir\n";
         gotoxy(30, 13);
+        cout << "------------------------------------------------------------\n";
+        gotoxy(30, 14);
         cout << "------------------------------------------------------------\n";
         cin >> opc;
 
@@ -120,8 +135,9 @@ void menu() {
                 eliminarfac();
                 break;
             case '4':
-                cout << "Saliendo...\n";
-                break;
+                resumenes();
+            case '5':
+                return;
             default:
                 cout << "Opción no válida. Inténtalo de nuevo.\n";
                 break;
@@ -144,7 +160,7 @@ void crearfac() {
 
 
     string line1;
-
+    
     ifstream INV("Basedatosinv.txt");
     if(!INV){
         return;
@@ -213,9 +229,7 @@ void crearfac() {
 
     INV.close();
 
-    remove("Basedatosinv.txt");
-
-    fflush(stdout);
+    reloj();
 
     cout << "Digite el tipo de cancelacion:" << endl;
     getline(cin, FAC1.cancelacion);
@@ -226,7 +240,7 @@ void crearfac() {
         return;
     }
 
-    out << FAC1.nombrecl << ',' << FAC1.nombrevndr << ',' << FAC1.totalsinIVA << ',' << FAC1.TOTALIVA << ',' << FAC1.TOTALIVA2 << ',' << FAC1.celular << ',' << FAC1.cancelacion << ',' << dia << ',' << mes + 1 << ',' << año - 100 << '\n';
+    out << FAC1.nombrecl << ',' << FAC1.nombrevndr << ',' << FAC1.totalsinIVA << ',' << FAC1.TOTALIVA << ',' << FAC1.TOTALIVA2 << ',' << FAC1.celular << ',' << FAC1.cancelacion << ',' << dia << ',' << mes << ',' << año << '\n';
     for (size_t i = 0; i < FAC1.productos.size(); ++i) {
         out << FAC1.productos[i] << ',' << FAC1.preciopro[i] << ',' << FAC1.cantidad[i] << '\n';
     }
@@ -368,8 +382,91 @@ void eliminarfac() {
     in.close();
     temp.close();
 
-    // Replace original file with temp file
+    // Reemplaza el original borrando el original y renombrando el temporal
     remove("Basefacs.txt");
     rename("Tempfacs.txt", "Basefacs.txt");
 }
 
+void resumenes(){
+    ifstream res("Basefacs.txt");
+    
+    if(!res){
+        cout << "La base de datos de facturas no se pudo abrir";
+    }
+
+    fecha FECHCOMP;
+
+    cout << "Digite las fechas que desea ver el resumen(dia/mes/año)" << endl;
+    cin >> FECHCOMP.dias;
+    cin >> FECHCOMP.mes;
+    cin >> FECHCOMP.año;
+
+    cout << "Digite la fecha maxima que desea ver el resumen(dia/mes/año)" << endl;
+    cin >> FECHCOMP.diasmax;
+    cin >> FECHCOMP.mesmax;
+    cin >> FECHCOMP.añoamax;
+
+    Factura FAC1;
+    fecha FECH1;
+    string line;
+    while(getline(res, line)){
+        stringstream ss(line);
+            getline(ss, FAC1.nombrecl, ',');
+            getline(ss, FAC1.nombrevndr, ',');
+            ss >> FAC1.totalsinIVA;
+            ss.ignore(); // Ignorar la coma
+            ss >> FAC1.TOTALIVA;
+            ss.ignore();
+            ss >> FAC1.TOTALIVA2;
+            ss.ignore();
+            ss >> FAC1.celular;
+            ss.ignore();
+            getline(ss, FAC1.cancelacion, ',');
+            ss >> FECH1.dias;
+            ss.ignore();
+            ss >> FECH1.mes;
+            ss.ignore();
+            ss >> FECH1.año;
+            
+
+        if((FECH1.dias >= FECHCOMP.dias && FECH1.mes >= FECHCOMP.mes && FECH1.año >=  FECHCOMP.año) && (FECH1.dias <= FECHCOMP.diasmax && FECH1.mes <= FECHCOMP.mesmax && FECH1.año <=  FECHCOMP.añoamax) ){
+
+            cout << "Nombre del Cliente: " << FAC1.nombrecl << endl;
+            cout << "Nombre del Vendedor: " << FAC1.nombrevndr << endl;
+            cout << "Total sin IVA: " << FAC1.totalsinIVA << endl;
+            cout << "IVA: " << FAC1.TOTALIVA << endl;
+            cout << "Total: " << FAC1.TOTALIVA2 << endl;
+            cout << "Celular: " << FAC1.celular << endl;
+            cout << "Tipo de cancelacion: " << FAC1.cancelacion << endl;
+            cout << "Productos:" << endl;
+
+            FAC1.productos.clear();
+            FAC1.preciopro.clear();
+            
+
+            while (getline(res, line) && line != "Final"){
+                stringstream ss(line);
+                string producto;
+                resumenesdats resumenes;
+                resumenes.productosvendidoscant++;
+                int precio;
+                int cantidad;
+                getline(ss, producto, ',');
+                ss >> precio;
+                ss.ignore();
+                ss >> cantidad;
+                resumenes.productosvendidos.push_back(producto);
+                resumenes.totalventas += precio;
+                cout << "Producto: " << producto << " - Precio: " << precio << " - Cantidad: " << cantidad << endl;
+            }
+            cout << "Fecha: " << FECH1.dias << ":" << FECH1.mes << ":" << FECH1.año;
+            cout << "\n------------------------------------" << endl;
+            }
+            
+    
+}
+
+system("pause");
+res.close();
+return menu();
+}

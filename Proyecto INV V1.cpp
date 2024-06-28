@@ -194,6 +194,7 @@ void añadiraexistente(){
     if(!nuevosi){
             cout << "El producto no fue encontrado!"<< endl;
             system("pause");
+            menu();
         } else{
             cout << "Cantidad en inventario actualizado correctamente!" << endl;
         }
