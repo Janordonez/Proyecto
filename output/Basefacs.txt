@@ -23,3 +23,7 @@ uhuh,ugu,8,1,9,54,j,27,6,24
 Alternador,2
 Alternador,2
 Final
+Joshua,adaw,15390000,2345436,18018612,23123,Dolares,27,6,2024
+Alternados,12312,20
+Alternados,12312,1230
+Final

@@ -67,9 +67,9 @@ struct fecha{
 
 //Estructura para los resumenes a partir de las facturas filtradas por la estructura anterior
 struct resumenesdats{
-    int totalventas;
+    int totalventas = 0;
     vector <string> productosvendidos;
-    int productosvendidoscant;
+    int productosvendidoscant = 0;
 };
 
 
@@ -469,8 +469,10 @@ void resumenes() {
         return;
     }
 
-    fecha FECHCOMP; // Objeto para almacenar la fecha de inicio del resumen
-    fecha FECHCOMPmax; // Objeto para almacenar la fecha máxima del resumen
+    resumenesdats resumen; // almacenar datos del resumen
+
+    fecha FECHCOMP; // almacenar la fecha de inicio del resumen
+    fecha FECHCOMPmax; // almacenar la fecha máxima del resumen
 
     // Solicita al usuario las fechas para filtrar el resumen
     cout << "Digite las fechas que desea ver el resumen (dia/mes/año):" << endl;
@@ -479,9 +481,9 @@ void resumenes() {
     cout << "Digite la fecha maxima que desea ver el resumen (dia/mes/año):" << endl;
     cin >> FECHCOMPmax.dias >> FECHCOMPmax.mes >> FECHCOMPmax.año;
 
-    Factura FAC1; // Objeto para almacenar detalles de la factura
-    fecha FECH1; // Objeto para almacenar la fecha de cada factura
-    string line; // Variable para almacenar cada línea del archivo de facturas
+    Factura FAC1; // almacenar detalles de la factura
+    fecha FECH1; // almacenar la fecha de cada factura
+    string line; // variable para almacenar cada línea del archivo de facturas
 
     while (getline(res, line)) { // Lee cada línea del archivo de facturas
         stringstream ss(line); // Crea un stringstream para analizar la línea
@@ -521,18 +523,19 @@ void resumenes() {
             FAC1.productos.clear(); // Limpia el vector de productos
             FAC1.preciopro.clear(); // Limpia el vector de precios de productos
 
+            resumen.totalventas += FAC1.TOTALIVA2; // Acumula la cantidad de total con IVA 
             // Lee y muestra los productos vendidos en la factura
             while (getline(res, line) && line != "Final") {
                 stringstream ss(line);
                 string producto;
                 int precio;
                 int cantidad;
-
                 getline(ss, producto, ','); // Lee el nombre del producto
                 ss >> precio; // Lee el precio del producto
                 ss.ignore();
                 ss >> cantidad; // Lee la cantidad del producto
-
+                resumen.productosvendidoscant += cantidad; // Acumula la cantidad de productos vendidos
+                resumen.productosvendidos.push_back(producto); // Guarda los nombres de todos los productos vendidos
                 // Muestra los detalles de cada producto vendido
                 cout << "Producto: " << producto << " - Precio: " << precio << " - Cantidad: " << cantidad << endl;
             }
@@ -541,7 +544,20 @@ void resumenes() {
             cout << "Fecha: " << FECH1.dias << ":" << FECH1.mes << ":" << FECH1.año << endl;
             cout << "------------------------------------" << endl;
         }
+
+        
     }
+
+    cout << "Resumen:" << endl;
+
+    cout << "Total de venta entre las fechas: " << resumen.totalventas << endl;
+        
+    cout << "Cantidad de productos vendidos: " << resumen.productosvendidoscant << endl;
+
+    cout << "Productos vendidos: " << endl;
+    for (size_t i = 0; i < resumen.productosvendidos.size(); i++){
+            cout << resumen.productosvendidos[i] << endl;
+        }
 
     system("pause"); // Pausa para que el usuario pueda ver la información
     res.close(); // Cierra el archivo de facturas
