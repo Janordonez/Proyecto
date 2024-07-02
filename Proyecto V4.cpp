@@ -1,4 +1,4 @@
-#include <iostream> // Libreria para la entrada y salida de datos
+#include <iostream> 
 #include <string> // Libreria para el uso de cadenas 
 #include <vector> // Libreria para la implementacion de vectores "arreglos dinamicos"
 #include <fstream> // Libreria para la manipulacion de archivos
@@ -225,9 +225,6 @@ void crearfac() {
     string line1; // Variable para leer lineas del archivo de inventario
 
     ifstream INV("Basedatosinv.txt"); // Abre el archivo de inventario para lectura
-    if (!INV) { // Verifica si el archivo de inventario se abrió correctamente
-        return; // Sale de la función si hay un problema con el archivo
-    }
 
     // Pregunta los datos del cliente y vendedor
     cout << "Ingrese el nombre del cliente:" << endl;
@@ -290,7 +287,7 @@ void crearfac() {
         cin >> opc;
         cin.ignore();
 
-    } while (opc == 'S' || opc == 's');
+    } while (opc == 'S' || opc == 's'); 
 
     INV.close(); // Cierra el archivo de inventario después de usarlo
 
@@ -767,6 +764,8 @@ void añadirinvnuevo() {
     if (!out) {
         cout << "El archivo no se pudo abrir";
     }
+
+
 
     // Escribir cada producto añadido al archivo de inventario
     for (size_t i = 0; i < Producto1.nombre.size(); i++) {
