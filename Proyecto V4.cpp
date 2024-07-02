@@ -75,7 +75,7 @@ struct resumenesdats{
 
 // Definir la función gotoxy
 void gotoxy(int x, int y) {
-    // Obtener el handle de la consola
+    // Obtener el handle de la consola al bufer de salida 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     
     // Definir la estructura COORD con la posicióno
@@ -113,7 +113,7 @@ void añadiraexistente();
 void verinv();
 void añadirmenu();
 void resumenes();
-void eliminarfac();
+void dardebajafac();
 void menufacs();
 void menuinv();
 
@@ -156,12 +156,12 @@ void menu() {
                 menuinv();
                 break;
             case '3':
-                return;
+                break;
             default:
                 cout << "Opcion no valida. Intentalo de nuevo.\n";
                 break;
         }
-    } while (opc != '4');
+    } while (opc != '3');
 }
 
 // Funcion del menu
@@ -200,7 +200,7 @@ void menufacs() {
                 verfac();
                 break;
             case '3':
-                eliminarfac();
+                dardebajafac();
                 break;
             case '4':
                 resumenes();
@@ -210,7 +210,7 @@ void menufacs() {
                 cout << "Opcion no valida. Intentalo de nuevo.\n";
                 break;
         }
-    } while (opc != '4');
+    } while (opc != '5');
 }
 
 
@@ -347,7 +347,7 @@ void verfac() {
             ss.ignore();
             getline(ss, FAC1.cancelacion, ','); // Lee el tipo de cancelación
             ss >> FECH1.dias; // Lee el dia de la fecha
-            ss.ignore();
+            ss.ignore();    
             ss >> FECH1.mes; // Lee el mes de la fecha
             ss.ignore();
             ss >> FECH1.año; // Lee el año de la fecha
@@ -397,7 +397,7 @@ void verfac() {
     in.close(); // Cierra el archivo de facturas
 }
 
-void eliminarfac() {
+void dardebajafac() {
     ifstream in("Basefacs.txt"); // Abre el archivo de facturas para lectura
     if (!in) { // Verifica si el archivo se abrió correctamente
         cerr << "No se pudo abrir el archivo para lectura." << endl;
@@ -415,7 +415,7 @@ void eliminarfac() {
     string nombre; // Nombre del cliente para buscar la factura
     bool encontrado = false; // Indicador si se encontró la factura
 
-    cout << "Digite el nombre del cliente para eliminar la factura:" << endl;
+    cout << "Digite el nombre del cliente para dar de baja la factura:" << endl;
     cin.ignore();
     getline(cin, nombre); // Lee el nombre del cliente
 
@@ -447,7 +447,7 @@ void eliminarfac() {
     if (!encontrado) {
         cout << "No se encontro ninguna factura para el cliente: " << nombre << endl;
     } else {
-        cout << "Factura eliminada exitosamente." << endl;
+        cout << "Factura dada de baja exitosamente." << endl;
     }
 
     in.close(); // Cierra el archivo de facturas
@@ -636,12 +636,10 @@ void añadirmenu() {
         gotoxy(63, 9);
         cout << "2. Ingresar Productos Existentes\n";
         gotoxy(63, 10);
-        cout << "3. Eliminar Productos\n";
-        gotoxy(63, 11);
-        cout << "4. Salir\n";
-        gotoxy(50, 12);
+        cout << "3. Salir\n";
+        gotoxy(50, 11);
         cout << "--------------------------------------------\n";
-        gotoxy(50, 13);
+        gotoxy(50, 12);
         cout << "--------------------------------------------\n";
         cin >> opc;
 
@@ -658,69 +656,7 @@ void añadirmenu() {
                 cout << "Opcion no valida. Intentalo de nuevo.\n";
                 break;
         }
-    } while (opc != '4'); // Salir del menú cuando se selecciona la opción 4
-}
-
-// Función para añadir productos existentes al inventario
-void añadiraexistente() {
-    ifstream in("Basedatosinv.txt"); // Abrir en modo de lectura la basededatos
-    ofstream temp("Basedatosinvtemp.txt"); // Abre un archivo de escritura temporal
-
-    Productosid Productosid;
-
-    string idproducto;
-    int ncantidad;
-    string line;
-    bool nuevosi = false;
-
-    // Mostrar los productos actuales en inventario
-    while (getline(in, line)) {
-        cout << line << endl;
-    };
-
-    in.clear();
-    in.seekg(0, ios::beg); // Reiniciar la lectura del archivo al inicio
-
-    cin.ignore();
-    cout << "Digite el producto que desea añadir: " << endl;
-    getline(cin, idproducto);
-
-    cout << "Cantidad: " << endl;
-    cin >> ncantidad;
-
-    // Procesar cada línea del archivo de inventario
-    while (getline(in, line)) {
-        stringstream ss(line);
-        getline(ss, Productosid.nombre, ',');
-        ss >> Productosid.PU;
-        ss.ignore();
-        ss >> Productosid.Cantidad;
-
-        if (Productosid.nombre == idproducto) {
-            nuevosi = true;
-            temp << Productosid.nombre << ',' << Productosid.PU << ',' << Productosid.Cantidad + ncantidad << endl;
-        } else {
-            temp << Productosid.nombre << ',' << Productosid.PU << ',' << Productosid.Cantidad << endl;
-        }
-    }
-
-    //Si el producto no se encontro se devuelve al menu
-    if (!nuevosi) {
-        cout << "El producto no fue encontrado!" << endl;
-        system("pause");
-        menu();
-        // Si es true avisa que se actualizo
-    } else {
-        cout << "Cantidad en inventario actualizado correctamente!" << endl;
-    }
-
-    in.close();
-    temp.close();
-
-    remove("Basedatosinv.txt");                // Eliminar el archivo original
-    rename("Basedatosinvtemp.txt", "Basedatosinv.txt");  // Renombrar el archivo temporal a original
-
-    menu();  // Volver al menú principal
+    } while (opc != '3'); // Salir del menú cuando se selecciona la opción 4
 }
 
 // Función para añadir nuevos productos al inventario
@@ -774,6 +710,72 @@ void añadirinvnuevo() {
 
     out.close(); // Cerrar archivo de inventario
     menu();      // Volver al menú principal
+}
+
+// Función para añadir productos existentes al inventario
+void añadiraexistente() {
+    ifstream in("Basedatosinv.txt"); // Abrir en modo de lectura la basededatos
+    ofstream temp("Basedatosinvtemp.txt"); // Abre un archivo de escritura temporal
+
+    Productosid Productosid;
+
+    int idproducto;
+
+    int ncantidad;
+    string line;
+
+    bool nuevosi = false;
+
+    // Mostrar los productos actuales en inventario
+    while (getline(in, line)) {
+        cout << line << endl;
+    };
+
+    in.clear();
+    in.seekg(0, ios::beg); // Reiniciar la lectura del archivo al inicio
+
+    cin.ignore();
+    cout << "Digite el ID del producto que desea ingresar: " << endl;
+    cin >> idproducto;
+
+    cout << "Cantidad: " << endl;
+    cin >> ncantidad;
+
+    // Procesar cada línea del archivo de inventario
+    while (getline(in, line)) {
+        stringstream ss(line);
+        ss >> Productosid.ID;
+        ss.ignore();
+        getline(ss, Productosid.nombre, ',');
+        ss >> Productosid.PU;
+        ss.ignore();
+        ss >> Productosid.Cantidad;
+
+        if (Productosid.ID == idproducto) {
+            nuevosi = true;
+            temp << Productosid.ID << ',' << Productosid.nombre << ',' << Productosid.PU << ',' << Productosid.Cantidad + ncantidad << endl;
+        } else {
+            temp << Productosid.ID << ',' << Productosid.nombre << ',' << Productosid.PU << ',' << Productosid.Cantidad << endl;
+        }
+    }
+
+    //Si el producto no se encontro se devuelve al menu
+    if (!nuevosi) {
+        cout << "El producto no fue encontrado!" << endl;
+        system("pause");
+        menu();
+        // Si es true avisa que se actualizo
+    } else {
+        cout << "Cantidad en inventario actualizado correctamente!" << endl;
+    }
+
+    in.close();
+    temp.close();
+
+    remove("Basedatosinv.txt");                // Eliminar el archivo original
+    rename("Basedatosinvtemp.txt", "Basedatosinv.txt");  // Renombrar el archivo temporal a original
+
+    menu();  // Volver al menú principal
 }
 
 // Función para ver todos los productos en inventario

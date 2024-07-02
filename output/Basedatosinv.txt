@@ -1,2 +1,2 @@
-1,Alternador,123123,100
-2,Frenos,123123,100
+1,Frenos,20,200
+2,Llantas,20,400
